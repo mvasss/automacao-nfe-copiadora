@@ -25,9 +25,12 @@ pip install -r requirements.txt
 
 ## 📂 Como usar
 1-Preencha o arquivo de entrada (Excel) com os dados das notas.
+
 2-Atualize o script com seu login/senha no portal da prefeitura.
+
 3-Execute com:
 python emissor_nfe_selenium.py
+
 4-O navegador será aberto automaticamente e as notas serão emitidas.
 
 ## 📄 Exemplo de estrutura do Excel

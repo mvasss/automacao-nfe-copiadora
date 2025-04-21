@@ -20,22 +20,21 @@ Ele realiza login no sistema, preenche os dados da nota e envia automaticamente.
 - Google Chrome instalado  
 - ChromeDriver compatível com sua versão do navegador  
 - Instalar dependências com:
-
-```bash
+bash
 pip install -r requirements.txt
 
-📂 Como usar
+## 📂 Como usar
 1-Preencha o arquivo de entrada (Excel) com os dados das notas.
 2-Atualize o script com seu login/senha no portal da prefeitura.
 3-Execute com:
 python emissor_nfe_selenium.py
 4-O navegador será aberto automaticamente e as notas serão emitidas.
 
-📄 Exemplo de estrutura do Excel
-PAGADOR   CPF		       Valor
-João      00000000000	 150,00
+## 📄 Exemplo de estrutura do Excel
+- PAGADOR   CPF		       Valor
+- João      00000000000	 150,00
 
-📌 Observações
-O código está em fase inicial/testes.
-O login e senha são armazenados diretamente no script (não recomendado para produção).
-Pode ser adaptado para outras cidades com pequenas mudanças.
+## 📌 Observações
+- O código está em fase inicial/testes.
+- O login e senha são armazenados diretamente no script (não recomendado para produção).
+

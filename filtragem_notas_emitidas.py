@@ -4,8 +4,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import TimeoutException
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import ElementNotInteractableException, TimeoutException, NoSuchElementException
+
 import pandas as pd
 import time
 
@@ -15,7 +15,7 @@ def ir_para_url(driver, url):
     Direciona o navegador para a URL especificada.
     """
     driver.get(url)
-    
+
 def preencher_data(driver, wait, id_campo, data):
     """
     Preenche um campo de data com formatação, garantindo que o cursor comece do início.
@@ -51,10 +51,12 @@ def buscar_nota(driver, wait, cpf, valor_esperado):
     if fechar_popup_se_existir(driver, wait):
         return "não"
 
-    # Verifica se apareceu múltiplos registros
+    # Verifica se apareceu múltiplos registros e tenta clicar, caso esteja visível e clicável
     try:
-        btn_endereco = driver.find_element(By.ID,
-                                           "MainContentPlaceHolder_WCListaRegistro_rptPesquisaDocumento_EditarGuiaImageButton_0")
+        btn_endereco = WebDriverWait(driver, 2).until(
+            EC.element_to_be_clickable((By.ID,
+                                        "MainContentPlaceHolder_WCListaRegistro_rptPesquisaDocumento_EditarGuiaImageButton_0"))
+        )
         btn_endereco.click()
         time.sleep(1.5)
 
@@ -62,20 +64,22 @@ def buscar_nota(driver, wait, cpf, valor_esperado):
         if fechar_popup_se_existir(driver, wait):
             return "não"
 
-    except NoSuchElementException:
+    except (NoSuchElementException, TimeoutException, ElementNotInteractableException):
         pass
 
-    # Nenhum popup: tentar pegar o valor da nota
+    # Tenta capturar todas as notas exibidas
     try:
-        campo_valor = wait.until(
-            EC.presence_of_element_located((By.ID, "MainContentPlaceHolder_rptDados_LinkButton7_0")))
-        valor_site = campo_valor.text.strip().replace("R$", "").replace(",", ".")
-        valor_site = float(valor_site)
-
-        if abs(valor_site - float(valor_esperado)) < 0.01:
-            return "sim"
-        else:
-            return "não"
+        elementos_valor = driver.find_elements(By.XPATH,
+                                               "//a[starts-with(@id, 'MainContentPlaceHolder_rptDados_LinkButton7_')]")
+        for el in elementos_valor:
+            texto = el.text.strip().replace("R$", "").replace(",", ".")
+            try:
+                valor_site = float(texto)
+                if abs(valor_site - float(valor_esperado)) < 0.01:
+                    return "sim"
+            except ValueError:
+                continue  # caso algum valor seja inválido
+        return "não"  # Nenhuma nota bateu
     except:
         return "não"
 
@@ -97,6 +101,8 @@ def fechar_popup_se_existir(driver, wait):
     except TimeoutException:
         return False
 
+# Data das notas a serem procuradas
+data = "18/07/2025"
 
 # Caminho para seu chromedriver
 caminho_driver = r"C:\Users\pc\Desktop\chromedriver\chromedriver-win64\chromedriver.exe"
@@ -130,8 +136,8 @@ time.sleep(1.5)
 ir_para_url(driver, "https://nfe.osasco.sp.gov.br/EissnfeWebApp/Sistema/Prestador/PesquisarNFE.aspx?IdPermissaoAcesso=132")
 
 # 5) Coloca a data da pesquisa
-preencher_data(driver, wait, "txtDataGeracaoInicio", "17/07/2025")
-preencher_data(driver, wait, "txtDataGeracaoFim", "17/07/2025")
+preencher_data(driver, wait, "txtDataGeracaoInicio", f"{data}")
+preencher_data(driver, wait, "txtDataGeracaoFim", f"{data}")
 
 # 6) Loop
 resultados = []
@@ -149,4 +155,4 @@ for index, row in df.iterrows():
 df["resultado"] = resultados
 
 # Salva o resultado final
-df.to_excel(r"C:\Users\pc\Desktop\planilha notas\nfe_resultado.xlsx", index=False
+df.to_excel(r"C:\Users\pc\Desktop\planilha notas\nfe_resultado.xlsx", index=False)

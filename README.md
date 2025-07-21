@@ -37,7 +37,4 @@ python emissor_nfe_selenium.py
 - PAGADOR   CPF		       Valor
 - João      00000000000	 150,00
 
-## 📌 Observações
-- O código está em fase inicial/testes.
-- O login e senha são armazenados diretamente no script (não recomendado para produção).
 
